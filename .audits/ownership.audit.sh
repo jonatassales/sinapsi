@@ -26,6 +26,8 @@ try {
   pass('npm identity and GitHub metadata identify jonatassales; license identifies Neongate AI')
 
   const release = read('.github/workflows/release.yml')
+  assert.ok(release.includes('workflow_dispatch:'), 'publishing requires manual dispatch')
+  assert.ok(!release.includes('  push:'), 'package metadata changes must not publish')
   for (const token of [
     "github.repository == 'jonatassales/sinapsi' && github.ref == 'refs/heads/main'",
     "name !== 'sinapsi'",
