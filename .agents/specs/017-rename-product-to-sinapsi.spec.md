@@ -18,7 +18,7 @@ In scope: npm identity, custom-element tag, public TypeScript names, log prefix,
 canonical JSON filename, dist filenames, consumer docs, audits, harness copy, and
 the Cursor reviewer subagent.
 
-Out of scope: renaming the GitHub repository `gojhonny/graphz`, the engineering
+Out of scope at the time: the separate GitHub repository rename, the engineering
 CLI binary `graph`, topology types such as `Graph`/`createGraph`, and the local
 checkout directory.
 
@@ -32,7 +32,8 @@ checkout directory.
 5. Canonical configuration lives at `src/sinapsi.config.json`.
 6. Dist entries are `dist/sinapsi.js` and `dist/standalone/sinapsi.js`.
 7. The engineering CLI remains `graph`; consumer setup installs `@neongate-ai/sinapsi`.
-8. GitHub URLs remain `gojhonny/graphz` until the remote is renamed separately.
+8. GitHub URLs followed the then-current repository until its separate rename;
+   the current canonical location is `jonatassales/sinapsi`.
 9. No compatibility aliases for the Graphz names; the package has not shipped a
    non-0.x release.
 

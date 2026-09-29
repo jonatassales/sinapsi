@@ -8,12 +8,12 @@
 
 <p align="center">
   <a href="https://paladini.io/harness-score/guide/maturity-model.html"><img alt="Harness Score L4" src="https://paladini.github.io/harness-score/maturity/badge-l4.svg" height="20"></a>
-  <a href="https://github.com/gojhonny/sinapsi/actions/workflows/ci.yml"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/gojhonny/sinapsi/ci.yml?branch=main&label=tests&logo=github" height="20"></a>
+  <a href="https://github.com/jonatassales/sinapsi/actions/workflows/ci.yml"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/jonatassales/sinapsi/ci.yml?branch=main&label=tests&logo=github" height="20"></a>
   <a href="https://www.npmjs.com/package/sinapsi"><img alt="npm version" src="https://img.shields.io/npm/v/sinapsi?logo=npm" height="20"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/gojhonny/sinapsi"><strong>Documentation</strong></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/jonatassales/sinapsi"><strong>Documentation</strong></a>&nbsp;&nbsp;&nbsp;
   <a href="https://www.npmjs.com/package/sinapsi"><strong>npm</strong></a>&nbsp;&nbsp;&nbsp;
   <a href="./LICENSE"><strong>MIT License</strong></a>
 </p>

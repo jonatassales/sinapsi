@@ -8,7 +8,7 @@ binary and explicit npx project setup.
 
 Commit messages follow Conventional Commits. `package.json#version` must be
 canonical SemVer. A staged version change must move forward relative to `HEAD`.
-Stable 1.x releases publish from `gojhonny/sinapsi` on main; 0.x versions skip
+Stable 1.x releases publish from `jonatassales/sinapsi` on main; 0.x versions skip
 npm publish.
 
 A release-oriented source change runs `graph check`; CI also lints commit history

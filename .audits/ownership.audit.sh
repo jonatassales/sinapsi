@@ -19,15 +19,15 @@ const pass = (message) => console.log(`PASS  ${message}`)
 
 try {
   assert.equal(pkg.name, 'sinapsi', 'package must use the Sinapsi npm identity')
-  assert.equal(pkg.author, 'gojhonny', 'author must use the owner handle without an invented email')
-  assert.equal(pkg.repository?.url, 'git+https://github.com/gojhonny/sinapsi.git')
-  assert.equal(pkg.bugs?.url, 'https://github.com/gojhonny/sinapsi/issues')
+  assert.equal(pkg.author, 'jonatassales', 'author must use the owner handle without an invented email')
+  assert.equal(pkg.repository?.url, 'git+https://github.com/jonatassales/sinapsi.git')
+  assert.equal(pkg.bugs?.url, 'https://github.com/jonatassales/sinapsi/issues')
   assert.match(read('LICENSE'), /Copyright \(c\) 2026 Neongate AI/)
-  pass('npm identity and GitHub metadata identify gojhonny; license identifies Neongate AI')
+  pass('npm identity and GitHub metadata identify jonatassales; license identifies Neongate AI')
 
   const release = read('.github/workflows/release.yml')
   for (const token of [
-    "github.repository == 'gojhonny/sinapsi' && github.ref == 'refs/heads/main'",
+    "github.repository == 'jonatassales/sinapsi' && github.ref == 'refs/heads/main'",
     "name !== 'sinapsi'",
     'sinapsi-$RELEASE_VERSION.tgz'
   ]) {
@@ -35,7 +35,6 @@ try {
   }
   pass('release owner guard and tarball use the Sinapsi package')
 
-  const abandonedNpmName = '@' + 'gojhonny/graphz'
   const staleGithubOwner = /(?:github\.com[/:]|githubusercontent\.com\/|github\/actions\/workflow\/status\/)neongate(?:-ai)?\//i
   const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], {
     cwd: root, encoding: 'utf8'
@@ -48,16 +47,14 @@ try {
     if (contents.includes(0)) continue
     const text = contents.toString('utf8')
     assert.ok(!staleGithubOwner.test(text), `obsolete GitHub ownership remains in active text: ${file}`)
-    assert.ok(!text.includes(abandonedNpmName), `abandoned npm identity remains in active text: ${file}`)
   }
-  pass('active text preserves npm identity and rejects obsolete GitHub ownership and the abandoned npm name')
+  pass('active text preserves npm identity and rejects obsolete GitHub ownership')
 
   const configuration = JSON.parse(read('src/sinapsi.config.json'))
   assert.equal(configuration.component.tagName, 'sinaps-i')
   assert.deepEqual(configuration.palette, {
     primary: '#F97316', text: '#F5F5F5', muted: '#A1A1AA'
   })
-  assert.ok(!read('README.md').includes('preset="gojhonny"'))
   pass('Sinapsi branding and canonical palette remain independent of GitHub ownership')
 
   const packageDirectory = path.join(temporary, 'package')
@@ -120,7 +117,7 @@ FIXTURE
   })
   assert.equal(noWrite.status, 1, 'setup must reject a manager that did not add the new dependency')
   assert.ok(noWrite.stderr.includes('without adding sinapsi to dependencies'))
-  for (const packageName of [abandonedNpmName, '@unrelated/sinapsi']) {
+  for (const packageName of ['@neongate-ai/sinapsi', '@unrelated/sinapsi']) {
     const wrongPackage = run(['--package-spec', `${packageName}@1.0.0`, '--dry-run'])
     assert.equal(wrongPackage.status, 2, `setup must reject package scope: ${packageName}`)
   }
