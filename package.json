@@ -4,7 +4,7 @@
   "description": "A framework-agnostic, SSR-safe Web Component that renders an animated 3D network graph with a configurable palette, motion, and semantic JSON nodes.",
   "type": "module",
   "license": "MIT",
-  "author": "gojhonny",
+  "author": "jonatassales",
   "main": "./dist/sinapsi.js",
   "module": "./dist/sinapsi.js",
   "types": "./dist/sinapsi.d.ts",
@@ -22,12 +22,12 @@
   "packageManager": "pnpm@12.4.2",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gojhonny/sinapsi.git"
+    "url": "git+https://github.com/jonatassales/sinapsi.git"
   },
   "bugs": {
-    "url": "https://github.com/gojhonny/sinapsi/issues"
+    "url": "https://github.com/jonatassales/sinapsi/issues"
   },
-  "homepage": "https://github.com/gojhonny/sinapsi",
+  "homepage": "https://github.com/jonatassales/sinapsi",
   "keywords": [
     "web-components",
     "custom-elements",

@@ -22,7 +22,8 @@ GitHub ownership remain independent (Rule 001).
 1. Publish `@neongate-ai/sinapsi`.
 2. Register `<sinap-si>` as the only runtime UI element.
 3. Name public types, factories, and diagnostics after Sinapsi.
-4. Keep the engineering binary `graph` and the GitHub repository `gojhonny/graphz`.
+4. Keep the engineering binary `graph`; the repository was renamed separately and
+   now lives at `jonatassales/sinapsi`.
 5. Do not re-export Graphz identifiers.
 
 ## Consequences

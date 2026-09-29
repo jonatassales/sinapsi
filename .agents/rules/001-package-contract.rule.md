@@ -17,5 +17,5 @@ alwaysApply: true
 7. Do not publish source maps.
 8. Treat every public export, attribute, property, and entry point as a compatibility commitment.
 9. Documentation sites and framework examples live outside this repository.
-10. npm identity and GitHub ownership are independent: publish `sinapsi` from `gojhonny/sinapsi`.
+10. npm identity and GitHub ownership are independent: publish `sinapsi` from `jonatassales/sinapsi`.
 11. Runtime dependencies are limited to pinned `motion` and `zod`. The standalone bundle inlines both.
