@@ -1,9 +1,7 @@
 name: Release
 
 on:
-  push:
-    branches: [main]
-    paths: [package.json]
+  # Publication is initiated by the owner, independently of merging a PR.
   workflow_dispatch:
 
 permissions:
