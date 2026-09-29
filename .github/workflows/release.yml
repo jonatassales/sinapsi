@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   publish:
-    if: github.repository == 'gojhonny/sinapsi' && github.ref == 'refs/heads/main'
+    if: github.repository == 'jonatassales/sinapsi' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

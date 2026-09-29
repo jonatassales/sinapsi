@@ -39,7 +39,7 @@ fi
 
 for token in \
   'paladini.github.io/harness-score/maturity/badge-l4.svg' \
-  'github/actions/workflow/status/gojhonny/sinapsi/ci.yml' \
+  'github/actions/workflow/status/jonatassales/sinapsi/ci.yml' \
   'img.shields.io/npm/v/sinapsi'
 do
   if grep -F "$token" README.md >/dev/null 2>&1; then
@@ -51,7 +51,7 @@ done
 
 if awk '
   BEGIN {
-    expected[1] = "<a href=\"https://github.com/gojhonny/sinapsi\"><strong>Documentation</strong></a>"
+    expected[1] = "<a href=\"https://github.com/jonatassales/sinapsi\"><strong>Documentation</strong></a>"
     expected[2] = "<a href=\"https://www.npmjs.com/package/sinapsi\"><strong>npm</strong></a>"
     expected[3] = "<a href=\"./LICENSE\"><strong>MIT License</strong></a>"
   }
