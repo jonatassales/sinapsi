@@ -10,6 +10,7 @@ export interface SinapsiReactAttributes {
   'color-text'?: string
   'active-node-ids'?: string
   activeNodeIds?: readonly string[]
+  paused?: boolean
   move?: SinapsiMove
   nodes?: string | SinapsiGraphDocument
   palette?: SinapsiPaletteOverrides

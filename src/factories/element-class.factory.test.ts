@@ -102,6 +102,119 @@ describe('factory/element-class', () => {
     document.body.replaceChildren()
   })
 
+  it('reflects explicit pause without changing motion inputs or accepting invalid values', () => {
+    const graph = createGraph()
+    graph.move = 'pulse'
+    graph.speed = 0.4
+    expect(graph.paused).toBe(false)
+    graph.paused = true
+    expect(graph.hasAttribute('paused')).toBe(true)
+    expect(graph.paused).toBe(true)
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    Reflect.set(graph, 'paused', 'false')
+    expect(graph.paused).toBe(true)
+    expect(error).toHaveBeenCalled()
+    graph.paused = false
+    expect(graph.hasAttribute('paused')).toBe(false)
+    graph.setAttribute('paused', 'false')
+    expect(graph.paused).toBe(true)
+    graph.paused = null
+    expect(graph.paused).toBe(false)
+    graph.paused = true
+    graph.paused = undefined
+    expect(graph.paused).toBe(false)
+    expect(graph.move).toBe('pulse')
+    expect(graph.speed).toBe(0.4)
+  })
+
+  it('copies exact painted semantic centers in viewport CSS pixels across scaling and cleanup', () => {
+    const render = vi.spyOn(CanvasRendererService.prototype, 'render')
+    vi.spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      left: 40,
+      top: 60,
+      width: 640,
+      height: 480,
+      right: 680,
+      bottom: 540,
+      x: 40,
+      y: 60,
+      toJSON: () => ({})
+    })
+    vi.spyOn(HTMLCanvasElement.prototype, 'clientWidth', 'get').mockReturnValue(320)
+    vi.spyOn(HTMLCanvasElement.prototype, 'clientHeight', 'get').mockReturnValue(240)
+    const graph = createGraph()
+    expect(graph.getNodePositions()).toEqual([])
+    graph.paused = true
+    graph.nodes = sample
+    const painted = render.mock.calls.at(-1)?.[0].nodes
+    expect(graph.getNodePositions()).toEqual(
+      painted?.map((node) => ({ id: node.id, x: 40 + node.x * 2, y: 60 + node.y * 2 }))
+    )
+    const positions = graph.getNodePositions()
+    Reflect.set(positions[0], 'x', -10000)
+    expect(graph.getNodePositions()[0].x).not.toBe(-10000)
+    graph.nodes = { graph: [{ ...sample.graph[0], links: [] }] }
+    expect(graph.getNodePositions().map((point) => point.id)).toEqual(['cause'])
+    graph.remove()
+    expect(graph.getNodePositions()).toEqual([])
+    document.body.append(graph)
+    expect(graph.getNodePositions().map((point) => point.id)).toEqual(['cause'])
+    graph.nodes = null
+    expect(graph.getNodePositions()).toEqual([])
+  })
+
+  it('pauses recurring work, repaints activation without motion, and resumes once', () => {
+    const schedule = vi.spyOn(frame, 'update').mockImplementation((process) => process)
+    const render = vi.spyOn(CanvasRendererService.prototype, 'render')
+    const graph = createGraph()
+    graph.nodes = sample
+    graph.paused = true
+    const stopped = graph.getNodePositions()
+    render.mockClear()
+    schedule.mockClear()
+    const hover = vi.fn()
+    const click = vi.fn()
+    graph.addEventListener(SINAPSI_NODE_HOVER_EVENT, hover)
+    graph.addEventListener(SINAPSI_NODE_CLICK_EVENT, click)
+    const focus = document.activeElement
+    graph.activeNodeIds = ['cause', 'pricing']
+    expect(graph.getNodePositions()).toEqual(stopped)
+    expect(render).toHaveBeenCalled()
+    const paintsAfterActivation = render.mock.calls.length
+    expect(schedule).not.toHaveBeenCalled()
+    graph.getNodePositions()
+    expect(render).toHaveBeenCalledTimes(paintsAfterActivation)
+    expect(document.activeElement).toBe(focus)
+    expect(hover).not.toHaveBeenCalled()
+    expect(click).not.toHaveBeenCalled()
+    graph.paused = false
+    graph.paused = false
+    expect(schedule).toHaveBeenCalledTimes(1)
+    graph.dispatchEvent(new Event('pointerenter'))
+    graph.paused = true
+    schedule.mockClear()
+    graph.paused = false
+    expect(schedule).not.toHaveBeenCalled()
+    graph.dispatchEvent(new Event('pointerleave'))
+    expect(schedule).toHaveBeenCalledTimes(1)
+  })
+
+  it('accepts pause before connection and preserves it on reconnect', () => {
+    const schedule = vi.spyOn(frame, 'update').mockImplementation((process) => process)
+    const graph = document.createElement(SINAPSI_TAG_NAME) as SinapsiElement
+    graph.setAttribute('paused', '')
+    graph.nodes = sample
+    expect(graph.getNodePositions()).toEqual([])
+    document.body.append(graph)
+    expect(graph.getNodePositions()).toHaveLength(2)
+    expect(schedule).not.toHaveBeenCalled()
+    graph.remove()
+    document.body.append(graph)
+    expect(graph.paused).toBe(true)
+    expect(graph.getNodePositions()).toHaveLength(2)
+    expect(schedule).not.toHaveBeenCalled()
+  })
+
   it('keeps the visual shadow tree closed', () => {
     expect(createGraph().shadowRoot).toBeNull()
   })

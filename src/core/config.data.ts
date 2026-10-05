@@ -40,5 +40,6 @@ export const SINAPSI_OBSERVED_ATTRIBUTES: readonly string[] = [
   ...SINAPSI_PROPERTY_ATTRIBUTES,
   'aria-label',
   'close-label',
-  'active-node-ids'
+  'active-node-ids',
+  'paused'
 ]

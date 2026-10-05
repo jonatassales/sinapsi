@@ -17,6 +17,7 @@ import { normalizeSpeed } from '@core/lib/normalize-speed.compute'
 import type {
   SinapsiElement,
   SinapsiElementConstructor,
+  SinapsiNodePosition,
   SinapsiShadowTree
 } from '@domain/kernel/element.types'
 import {
@@ -33,6 +34,7 @@ import type {
   SinapsiPalette,
   SinapsiPaletteOverrides
 } from '@domain/kernel/properties.types'
+import type { RenderNode } from '@domain/kernel/render.types'
 import { sinapsiShadowTreeFactory } from '@factories/shadow-tree.factory'
 import { GraphAnimationService } from '@services/animation.service'
 import { GraphPresentationService } from '@services/presentation.service'
@@ -64,6 +66,7 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
     readonly #presentation: GraphPresentationService
     #acceptedActiveIds: string[] = []
     #acceptedNodes: SinapsiGraphDocument | null = null
+    #paintedNodes: readonly RenderNode[] = []
     #connected = false
     #hostHovered = false
     #listFocused = false
@@ -115,6 +118,18 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
       this.setAttribute('move', normalizeMove(value))
     }
 
+    get paused(): boolean {
+      return this.hasAttribute('paused')
+    }
+
+    set paused(value: boolean | null | undefined) {
+      if (value != null && typeof value !== 'boolean') {
+        console.error('[Sinapsi] Invalid paused: expected a boolean. Keeping previous pause.')
+        return
+      }
+      this.toggleAttribute('paused', value === true)
+    }
+
     get speed(): number {
       return normalizeSpeed(this.getAttribute('speed'))
     }
@@ -149,6 +164,19 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
       this.setAttribute('active-node-ids', JSON.stringify(value))
     }
 
+    getNodePositions(): readonly SinapsiNodePosition[] {
+      if (!this.#connected || !this.#acceptedNodes) return []
+      const canvas = this.#tree.canvas
+      const bounds = canvas.getBoundingClientRect()
+      const scaleX = bounds.width / (canvas.clientWidth || bounds.width || 1)
+      const scaleY = bounds.height / (canvas.clientHeight || bounds.height || 1)
+      return this.#paintedNodes.map(({ id, x, y }) => ({
+        id,
+        x: bounds.left + x * scaleX,
+        y: bounds.top + y * scaleY
+      }))
+    }
+
     get nodes(): SinapsiGraphDocument | null {
       return this.#acceptedNodes ? structuredClone(this.#acceptedNodes) : null
     }
@@ -176,7 +204,10 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
       this.#connected = true
       this.#listen()
       this.#presentation.connect()
-      this.#animation.setFrameListener((frame) => this.#presentation.update(frame))
+      this.#animation.setFrameListener((frame) => {
+        this.#paintedNodes = this.#acceptedNodes ? frame.nodes : []
+        this.#presentation.update(frame)
+      })
       this.#syncFreeze()
       this.#animation.start()
       this.#observeSize()
@@ -197,6 +228,7 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
       this.#listFocused = false
       this.#animation.setFrameListener(null)
       this.#animation.dispose()
+      this.#paintedNodes = []
     }
 
     attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
@@ -208,6 +240,10 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
         return
       }
 
+      if (name === 'paused') {
+        this.#syncFreeze()
+        return
+      }
       this.#syncAccessibility()
       if (name === 'aria-label' || name === 'close-label') return
       this.#animation.apply(this.#properties())
@@ -388,7 +424,9 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
     }
 
     #syncFreeze(): void {
-      this.#animation.setFrozen(this.#hostHovered || this.#listFocused || prefersReducedMotion())
+      this.#animation.setFrozen(
+        this.paused || this.#hostHovered || this.#listFocused || prefersReducedMotion()
+      )
     }
 
     #resetInteraction(): void {

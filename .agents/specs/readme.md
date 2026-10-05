@@ -17,3 +17,7 @@ Statuses are `Proposed`, `In progress`, `Implemented`, `Superseded`, and
 [`workflow.md`](./workflow.md), and link applicable ADRs and rules.
 
 - [022-programmatic-node-activation.spec.md](022-programmatic-node-activation.spec.md) — explicit programmatic node highlights and frozen rendering.
+
+- [023-public-pause-and-node-positions.spec.md](023-public-pause-and-node-positions.spec.md) — explicit pause and public painted semantic geometry.
+
+- [SPEC-023 evidence](023-public-pause-and-node-positions.evidence.md) — pause, painted positions, browser and package gates.
