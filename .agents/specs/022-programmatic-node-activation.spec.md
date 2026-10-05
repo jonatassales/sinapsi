@@ -7,7 +7,7 @@
 
 ## Contract
 
-Prepare additive 0.3.0, without publishing. Public `activeNodeIds` is a typed readonly string array, reflected as JSON `active-node-ids`. Validate and deduplicate nonempty IDs; unknown IDs are pruned against the current semantic document. Invalid input logs a diagnostic and retains the previous valid set. Removing the attribute or setting null clears it. Graph replacement prunes removed IDs. Getter snapshots cannot mutate internal state.
+Prepare additive 0.3.0. The owner separately authorized completing the 0.3.0 release on 2026-10-05 after the local prerequisite checks passed; publication follows the release workflow. Public `activeNodeIds` is a typed readonly string array, reflected as JSON `active-node-ids`. Validate and deduplicate nonempty IDs; unknown IDs are pruned against the current semantic document. Invalid input logs a diagnostic and retains the previous valid set. Removing the attribute or setting null clears it. Graph replacement prunes removed IDs. Getter snapshots cannot mutate internal state.
 
 Highlight exactly programmatic nodes and their incident edges, independently of existing hover/click selection. No synthesized events, native cards, labels, focus movement or graph freeze. No portfolio-specific three-node limit. Existing interaction semantics remain available alongside programmatic highlighting. Decorative generated graphs remain muted.
 
