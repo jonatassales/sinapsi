@@ -14,3 +14,5 @@ Use [`template.md`](./template.md) for new decisions. Never rewrite an accepted
 ADR to hide a changed decision; record the update and supersede it explicitly.
 
 - [0018-programmatic-node-activation.adr.md](0018-programmatic-node-activation.adr.md) — explicit programmatic node highlights and frozen rendering.
+
+- [0019-public-pause-and-painted-positions.adr.md](0019-public-pause-and-painted-positions.adr.md) — independent pause and copied painted-position snapshots.

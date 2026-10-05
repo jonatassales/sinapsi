@@ -15,7 +15,11 @@ export { normalizeMove } from '@core/lib/normalize-move.compute'
 export { parseNodesDocument, serializeNodesDocument } from '@core/lib/normalize-nodes.compute'
 export { normalizePalette } from '@core/lib/normalize-palette.compute'
 export { normalizeSpeed } from '@core/lib/normalize-speed.compute'
-export type { SinapsiElement, SinapsiElementConstructor } from '@domain/kernel/element.types'
+export type {
+  SinapsiElement,
+  SinapsiElementConstructor,
+  SinapsiNodePosition
+} from '@domain/kernel/element.types'
 export type {
   SinapsiGraphDocument,
   SinapsiLink,

@@ -268,6 +268,7 @@ With a bundler, replace the script tag with `import 'sinapsi/browser'`.
 | `move` | `idle`, `rotate`, `pulse` | `rotate` | Select the idle animation |
 | `speed` | Number in `[0.1, 10]` | `1` | Scale animation speed |
 | `nodes` | JSON `{ "graph": SinapsiNode[] }` | omitted | Semantic graph; omit for the generated decorative graph |
+| `paused` | Boolean presence | omitted | Explicit pause, preserving motion settings (0.4.0) |
 | `active-node-ids` | JSON string ID array | omitted | Exact programmatic node highlights and incident edges (0.3.0) |
 | `close-label` | Text | `Close` | Accessible label for the presentation close button |
 | `aria-label` | Text | `Graph nodes` internally | Localized name for semantic keyboard navigation |
@@ -302,6 +303,8 @@ The element reflects the same presentation controls. The TypeScript surface is
 | `move` | `'idle' \| 'rotate' \| 'pulse'` | Getter returns the normalized move. Setter writes the attribute; `null` / `undefined` removes it. |
 | `speed` | `number` | Unitless multiplier in `[0.1, 10]`. Setter writes the normalized number; `null` / `undefined` removes the attribute. |
 | `nodes` | `SinapsiGraphDocument \| null` | Last accepted `{ graph }` snapshot, or `null` when decorative. Setter accepts that document, its JSON string, or `null` / `undefined` to clear. |
+| `paused` | `boolean` | Reflected Boolean attribute; false/null/undefined clears (0.4.0). |
+| `getNodePositions()` | `readonly SinapsiNodePosition[]` | Copied last-painted semantic centers in viewport CSS pixels (0.4.0). |
 | `activeNodeIds` | `readonly string[]` | Reflected JSON IDs; invalid input retains previous state; null clears (0.3.0). |
 | `palette` | `{ primary, text, muted }` | Getter returns the resolved three-token object. Setter accepts a partial override; omitted tokens fall back to the package defaults. |
 
@@ -915,4 +918,40 @@ graph.activeNodeIds = []
 
 Supply nodes before activation. IDs are deduplicated and restricted to the current semantic graph; replacement prunes removed nodes. Invalid arrays or JSON preserve the previous valid set and log a diagnostic. Null, undefined or attribute removal clears activation. The getter returns a snapshot.
 
-Only supplied nodes and their incident edges are highlighted. This does not simulate hover/click, select nodes, show labels/cards, emit interaction events, move focus or stop movement. Existing hover/focus/selection can coexist. Scheduling and limits belong to the consumer. Frozen/reduced-motion instances paint on updates without a recurring animation loop. This checkout prepares 0.3.0; publication is separate.
+Only supplied nodes and their incident edges are highlighted. This does not simulate hover/click, select nodes, show labels/cards, emit interaction events, move focus or stop movement. Existing hover/focus/selection can coexist. Scheduling and limits belong to the consumer. Frozen/reduced-motion instances paint on updates without a recurring animation loop. Activation was introduced in 0.3.0.
+
+
+## Explicit pause and external overlays (0.4.0)
+
+```ts
+import type { SinapsiElement, SinapsiNodePosition } from 'sinapsi'
+
+const graph = document.querySelector('sinaps-i') as SinapsiElement
+graph.paused = true
+graph.activeNodeIds = ['pricing', 'permissions']
+const positions: readonly SinapsiNodePosition[] = graph.getNodePositions()
+// For a fixed overlay, use x/y directly. For an absolute overlay, subtract
+// its getBoundingClientRect().left/top and account for its own scaling.
+// Render consumer-owned cards above the matching IDs.
+graph.activeNodeIds = []
+graph.paused = false
+```
+
+The `paused` HTML attribute follows Boolean presence semantics: `paused="false"`
+**also pauses**. Remove it to resume. Invalid non-Boolean property writes retain
+previous state and report a diagnostic. Pause stops motion, reveal work, and the
+recurring render loop while keeping `move`, `speed`, activation and selection.
+Updates and resize still paint when necessary. Unpause respects hover, keyboard
+focus and reduced motion; it does not override those freeze reasons.
+
+`getNodePositions()` returns fresh `{ id, x, y }` snapshots from the exact last
+painted semantic frame. Coordinates are viewport CSS pixels, independent of DPR,
+and include axis-aligned CSS translation/scaling of the canvas and ancestors.
+CSS rotation/skew is outside this contract. Readback does not repaint, change focus,
+synthesize events or open native cards. It returns `[]` before the first semantic
+paint, for a decorative graph, or while disconnected. Re-query after resize,
+scroll, transform changes or reconnection. Pause before reading to hold external
+cards still. Scheduling, card layout and node limits remain consumer-owned.
+
+This source prepares 0.4.0. The owner publishes separately; downstream consumers
+must install the published package before using these APIs.

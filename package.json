@@ -1,6 +1,6 @@
 {
   "name": "sinapsi",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A framework-agnostic, SSR-safe Web Component that renders an animated 3D network graph with a configurable palette, motion, and semantic JSON nodes.",
   "type": "module",
   "license": "MIT",

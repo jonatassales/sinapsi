@@ -1,6 +1,13 @@
 import type { SinapsiGraphDocument } from './nodes.types'
 import type { SinapsiMove, SinapsiPalette, SinapsiPaletteOverrides } from './properties.types'
 
+/** Exact semantic node center in viewport CSS pixels, after axis-aligned host transforms. */
+export interface SinapsiNodePosition {
+  readonly id: string
+  readonly x: number
+  readonly y: number
+}
+
 /**
  * Public surface of `<sinaps-i>`. Attributes are the source of truth: getters
  * read and normalize them, setters write normalized values back.
@@ -10,11 +17,16 @@ export interface SinapsiElement extends HTMLElement {
   set palette(value: SinapsiPaletteOverrides | null | undefined)
   get move(): SinapsiMove
   set move(value: SinapsiMove | null | undefined)
+  /** Explicit pause, composed with interaction and reduced-motion freezing. */
+  get paused(): boolean
+  set paused(value: boolean | null | undefined)
   get speed(): number
   set speed(value: number | null | undefined)
   /** Exact semantic IDs to highlight without interaction. Invalid values retain the previous set. */
   get activeNodeIds(): readonly string[]
   set activeNodeIds(value: readonly string[] | null | undefined)
+  /** Copies centers from the last painted semantic frame; empty while disconnected. */
+  getNodePositions(): readonly SinapsiNodePosition[]
   get nodes(): SinapsiGraphDocument | null
   set nodes(value: SinapsiGraphDocument | string | null | undefined)
 }
