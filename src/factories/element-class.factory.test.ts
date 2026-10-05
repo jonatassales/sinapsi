@@ -419,7 +419,9 @@ describe('factory/element-class', () => {
 })
 
 describe('factory/programmatic-activation', () => {
-  beforeAll(() => { defineSinapsi() })
+  beforeAll(() => {
+    defineSinapsi()
+  })
   const documentData = {
     graph: [
       { id: 'a', name: 'A', payload: {}, links: [{ id: 'b', name: 'B' }] },
@@ -432,6 +434,33 @@ describe('factory/programmatic-activation', () => {
     document.body.replaceChildren()
     vi.restoreAllMocks()
   })
+  it('normalizes activation against initial nodes markup before the nodes callback', () => {
+    const graph = document.createElement('sinaps-i') as SinapsiElement
+    const getAttribute = graph.getAttribute.bind(graph)
+    // Browsers expose all initial attributes before upgrade callbacks. Happy DOM
+    // does not deliver those callbacks, so model only its initial nodes read here.
+    const attribute = vi
+      .spyOn(graph, 'getAttribute')
+      .mockImplementation((name) =>
+        name === 'nodes' ? serializeNodesDocument(documentData) : getAttribute(name)
+      )
+    graph.setAttribute('active-node-ids', '["a","c"]')
+    expect(graph.activeNodeIds).toEqual(['a', 'c'])
+    expect(graph.getAttribute('active-node-ids')).toBe('["a","c"]')
+    attribute.mockRestore()
+    graph.nodes = documentData
+    expect(graph.nodes).toEqual(documentData)
+    expect(graph.activeNodeIds).toEqual(['a', 'c'])
+  })
+
+  it('continues pruning property activation written before a semantic graph exists', () => {
+    const graph = document.createElement('sinaps-i') as SinapsiElement
+    graph.activeNodeIds = ['a']
+    expect(graph.activeNodeIds).toEqual([])
+    graph.nodes = documentData
+    expect(graph.activeNodeIds).toEqual([])
+  })
+
   it('reflects deduplicated IDs, preserves valid state after invalid input, prunes replacement', () => {
     const graph = document.createElement('sinaps-i') as SinapsiElement
     graph.nodes = documentData
@@ -484,20 +513,26 @@ describe('factory/programmatic-activation', () => {
   })
   it('updates a reduced-motion instance through public properties without a frame subscription', () => {
     let changed: (() => void) | undefined
-    const media = { matches: true, addEventListener: vi.fn((_event: string, callback: () => void) => { changed = callback }), removeEventListener: vi.fn() }
+    const media = {
+      matches: true,
+      addEventListener: vi.fn((_event: string, callback: () => void) => {
+        changed = callback
+      }),
+      removeEventListener: vi.fn()
+    }
     vi.stubGlobal('matchMedia', () => media)
     const schedule = vi.spyOn(frame, 'update')
     const render = vi.spyOn(CanvasRendererService.prototype, 'render')
     const graph = document.createElement('sinaps-i') as SinapsiElement
     graph.nodes = documentData
     document.body.append(graph)
-    const before = render.mock.calls.at(-1)?.[0].nodes.map(({x,y}) => ({x,y}))
+    const before = render.mock.calls.at(-1)?.[0].nodes.map(({ x, y }) => ({ x, y }))
     graph.activeNodeIds = ['a']
     graph.palette = { primary: '#ff9500' }
     graph.move = 'pulse'
     const painted = render.mock.calls.at(-1)?.[0]
-    expect(painted?.nodes.map(({x,y}) => ({x,y}))).toEqual(before)
-    expect(painted?.nodes.filter(node => node.emphasized).map(node => node.id)).toEqual(['a'])
+    expect(painted?.nodes.map(({ x, y }) => ({ x, y }))).toEqual(before)
+    expect(painted?.nodes.filter((node) => node.emphasized).map((node) => node.id)).toEqual(['a'])
     expect(painted?.reveal).toBe(1)
     expect(painted?.pulse).toBe(0)
     expect(schedule).not.toHaveBeenCalled()
@@ -507,5 +542,4 @@ describe('factory/programmatic-activation', () => {
     graph.remove()
     expect(media.removeEventListener).toHaveBeenCalledTimes(1)
   })
-
 })

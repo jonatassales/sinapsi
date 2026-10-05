@@ -1,6 +1,6 @@
 # SPEC-022: Programmatic node activation
 
-- Status: In progress
+- Status: Implemented; owner publication pending
 - Created: 2026-10-05
 - Mode: Prospective
 - Owner: Sinapsi maintainers
@@ -25,4 +25,6 @@ ADR-0018; extends SPEC-021 without restoring the removed numeric activation API.
 
 The existing tests audit first reproduced two noncanonical presentation suite names and four CI sensor commands bypassing Graph. Renaming those suites to their required core/service concerns and restoring the four explicit Graph CI commands resolved that gate without changing runtime behavior.
 
-`./cli/graph check` passed: 116 tests across 25 suites, source/test typecheck, lint, module/standalone builds, version validation and every repository audit. Log: `/tmp/sinapsi-gate-check.log`. `npm pack --dry-run --ignore-scripts --json` then verified the already-validated package payload: 42 allowed files, 111195 bytes packed and 385918 bytes unpacked, with no source maps, tests, hooks or harness files. Payload evidence: `/tmp/sinapsi-package-payload.json`. No package was created or published by that dry run. Publication and downstream pinning remain separate operations.
+`./cli/graph check` passed: 118 tests across 25 suites, source/test typecheck, lint, module/standalone builds, version validation and every repository audit. Log: `/tmp/sinapsi-gate-check.log`. `npm pack --dry-run --ignore-scripts --json` then verified the already-validated package payload: 42 allowed files, 111195 bytes packed and 385918 bytes unpacked, with no source maps, tests, hooks or harness files. Payload evidence: `/tmp/sinapsi-package-payload.json`. No package was created or published by that dry run. Publication and downstream pinning remain separate operations.
+
+Final review also fixed initial HTML attribute-order loss: an already-present nodes document is read before activation IDs are pruned. Property activation written before any graph remains pruned. Both HTML attribute orders passed a real Chromium upgrade check with no page errors. Final local gate: `/tmp/sinapsi-attribute-order-check.log`; browser evidence: `/tmp/sinapsi-attribute-order-browser-green.json`. The owner requested PR delivery and will perform publication separately.

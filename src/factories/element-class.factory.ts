@@ -270,7 +270,13 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
           JSON.stringify(this.#acceptedActiveIds)
         )
       }
-      const valid = new Set(this.#acceptedNodes?.graph.map((node) => node.id))
+      // During HTML upgrade, activation can be observed before the nodes callback.
+      // All initial attributes are already present, regardless of their source order.
+      const initialNodes = this.#acceptedNodes
+        ? null
+        : parseNodesDocument(this.getAttribute('nodes'))
+      const document = this.#acceptedNodes ?? (initialNodes?.ok ? initialNodes.document : null)
+      const valid = new Set(document?.graph.map((node) => node.id))
       this.#acceptedActiveIds = [...new Set(parsed as string[])].filter((id) => valid.has(id))
       return (
         value !== null &&
