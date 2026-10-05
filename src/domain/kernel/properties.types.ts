@@ -21,5 +21,6 @@ export interface SinapsiProperties {
   readonly speed: number
   /** Generated decorative density when no semantic document is showing. */
   readonly generatedNodes: number
+  readonly activeNodeIds?: readonly string[]
   readonly semanticNodes: SinapsiGraphDocument | null
 }

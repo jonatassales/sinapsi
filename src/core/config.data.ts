@@ -39,5 +39,6 @@ export const SINAPSI_OBSERVED_ATTRIBUTES: readonly string[] = [
   ...SINAPSI_COLOR_KEYS.map((key) => SINAPSI_COLOR_ATTRIBUTES[key]),
   ...SINAPSI_PROPERTY_ATTRIBUTES,
   'aria-label',
-  'close-label'
+  'close-label',
+  'active-node-ids'
 ]

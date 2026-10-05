@@ -85,7 +85,9 @@ export class GraphSceneService {
     const pulse = move === 'pulse' ? heartbeat(this.pulsePhase) : 0
     const breath =
       move === 'pulse' ? heartbeatScale(pulse, sinapsiConfiguration.motion.pulseScale) : 1
-    const hasActive = interaction.semantic && interaction.activeId !== null
+    const hasActive =
+      interaction.semantic &&
+      (interaction.activeId !== null || Boolean(interaction.programmaticIds?.size))
     const projected = this.graph.nodes.map((node) =>
       this.projectNode(node, viewport, breath, interaction, hasActive)
     )
@@ -97,6 +99,7 @@ export class GraphSceneService {
       nodes: interaction.semantic ? fitProjection(projected, viewport, fittedEnvelope) : projected,
       edges: this.graph.edges,
       activeId: interaction.semantic ? interaction.activeId : null,
+      programmaticIds: interaction.programmaticIds ?? new Set(),
       reveal: this.reveal,
       pulse
     }
@@ -112,9 +115,10 @@ export class GraphSceneService {
     const axis = rotateAroundAxis(this.spinAxis, this.precessAxis, this.precession)
     const world = scale(rotateAroundAxis(this.jittered(node), axis, this.spin), breath)
     const selected = interaction.semantic && interaction.selectedId === node.key
-    const emphasized = interaction.semantic && interaction.activeIds.has(node.key)
+    const programmed = interaction.semantic && Boolean(interaction.programmaticIds?.has(node.key))
+    const emphasized = interaction.semantic && (interaction.activeIds.has(node.key) || programmed)
     const selectionActive = interaction.activeId === interaction.selectedId
-    const lit = emphasized ? (selectionActive ? 1 : 0.45) : 0
+    const lit = emphasized ? (selectionActive || programmed ? 1 : 0.45) : 0
     return {
       ...project(world, sinapsiConfiguration.motion.camera, viewport, this.sceneRadius),
       id: node.key,

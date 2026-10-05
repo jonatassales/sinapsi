@@ -12,3 +12,5 @@ lighting event-driven and drops public `activation`.
 
 Use [`template.md`](./template.md) for new decisions. Never rewrite an accepted
 ADR to hide a changed decision; record the update and supersede it explicitly.
+
+- [0018-programmatic-node-activation.adr.md](0018-programmatic-node-activation.adr.md) — explicit programmatic node highlights and frozen rendering.

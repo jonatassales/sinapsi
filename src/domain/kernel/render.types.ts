@@ -29,6 +29,7 @@ export interface RenderNode extends ProjectedPoint {
 }
 
 export interface SceneInteraction {
+  readonly programmaticIds?: ReadonlySet<string>
   readonly activeId: string | null
   readonly activeIds: ReadonlySet<string>
   readonly selectedId: string | null
@@ -39,6 +40,8 @@ export interface SceneInteraction {
 
 /** Everything the renderer needs for one frame, already projected to screen space. */
 export interface RenderFrame {
+  /** Exact programmatic nodes; all incident edges receive active treatment. */
+  readonly programmaticIds?: ReadonlySet<string>
   readonly nodes: readonly RenderNode[]
   readonly edges: readonly GraphEdge[]
   /** Only edges incident to this exact ID receive the active treatment. */

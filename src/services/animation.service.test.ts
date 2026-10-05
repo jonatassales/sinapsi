@@ -154,7 +154,7 @@ describe('service/animation', () => {
     audit.service.dispose()
   })
 
-  it('reports the exact painted frame after rendering, including frozen ticks and resize', () => {
+  it('does not render recurring frozen ticks; reports invalidated frames after resize and interaction', () => {
     const audit = animationFixture()
     audit.service.setFrozen(true)
     const listener = vi.fn((frame: RenderFrame) => {
@@ -163,9 +163,12 @@ describe('service/animation', () => {
     audit.service.setFrameListener(listener)
     audit.tick()
     audit.tick()
-    expect(listener).toHaveBeenCalledTimes(2)
-    expect(listener.mock.calls[0][0]).toEqual(listener.mock.calls[1][0])
+    expect(listener).not.toHaveBeenCalled()
     audit.service.resize()
+    expect(listener).toHaveBeenCalledTimes(1)
+    audit.service.setHoverId('a')
+    expect(listener).toHaveBeenCalledTimes(2)
+    audit.service.apply({ ...audit.properties, activeNodeIds: ['d'] })
     expect(listener).toHaveBeenCalledTimes(3)
     audit.service.setFrameListener(null)
     audit.tick()
@@ -173,6 +176,52 @@ describe('service/animation', () => {
     audit.service.dispose()
     expect(audit.cancel).toHaveBeenCalledTimes(1)
     expect(audit.stopReveal).toHaveBeenCalledTimes(1)
+  })
+
+  it('has no recurring frame or reveal tween when initially reduced, and resumes exactly once', () => {
+    const schedule = vi.fn(),
+      cancel = vi.fn(),
+      tween = vi.fn(() => ({ stop: vi.fn() }))
+    const service = new GraphAnimationService(
+      document.createElement('canvas'),
+      {
+        palette: DEFAULT_SINAPSI_PALETTE,
+        move: 'rotate',
+        speed: 1,
+        generatedNodes: 12,
+        semanticNodes: triangle
+      },
+      { loop: { schedule, cancel }, tween }
+    )
+    service.setFrozen(true)
+    service.start()
+    expect(schedule).not.toHaveBeenCalled()
+    expect(tween).not.toHaveBeenCalled()
+    service.setFrozen(false)
+    service.setFrozen(false)
+    expect(schedule).toHaveBeenCalledTimes(1)
+    service.setFrozen(true)
+    expect(cancel).toHaveBeenCalledTimes(1)
+    service.setFrozen(false)
+    expect(schedule).toHaveBeenCalledTimes(2)
+    service.dispose()
+    expect(cancel).toHaveBeenCalledTimes(2)
+  })
+
+  it('programmatic activation preserves live movement and highlights exact IDs', () => {
+    const audit = animationFixture()
+    audit.service.apply({ ...audit.properties, activeNodeIds: ['a', 'd'] })
+    const before = audit.latest().nodes.map(({ x, y }) => ({ x, y }))
+    audit.tick()
+    expect(audit.latest().nodes.map(({ x, y }) => ({ x, y }))).not.toEqual(before)
+    expect(
+      audit
+        .latest()
+        .nodes.filter((node) => node.emphasized)
+        .map((node) => node.id)
+    ).toEqual(['a', 'd'])
+    expect(audit.latest().nodes.every((node) => !node.labeled && !node.selected)).toBe(true)
+    audit.service.dispose()
   })
 
   it('reconnects fully revealed when disposed during the initial reveal tween', () => {

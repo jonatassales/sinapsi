@@ -62,6 +62,7 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
     readonly #tree: SinapsiShadowTree
     readonly #animation: GraphAnimationService
     readonly #presentation: GraphPresentationService
+    #acceptedActiveIds: string[] = []
     #acceptedNodes: SinapsiGraphDocument | null = null
     #connected = false
     #hostHovered = false
@@ -125,6 +126,27 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
       }
 
       this.setAttribute('speed', String(normalizeSpeed(value)))
+    }
+
+    get activeNodeIds(): readonly string[] {
+      return [...this.#acceptedActiveIds]
+    }
+
+    set activeNodeIds(value: readonly string[] | null | undefined) {
+      if (value == null) {
+        this.removeAttribute('active-node-ids')
+        return
+      }
+      if (
+        !Array.isArray(value) ||
+        !value.every((id) => typeof id === 'string' && id.trim().length > 0)
+      ) {
+        console.error(
+          '[Sinapsi] Invalid activeNodeIds: expected nonempty string IDs. Keeping previous activation.'
+        )
+        return
+      }
+      this.setAttribute('active-node-ids', JSON.stringify(value))
     }
 
     get nodes(): SinapsiGraphDocument | null {
@@ -206,6 +228,8 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
         return false
       }
 
+      if (name === 'active-node-ids') return this.#normalizeActiveIds(value)
+
       if (name === 'nodes') {
         return this.#normalizeNodes(value)
       }
@@ -225,9 +249,45 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
       return false
     }
 
+    #normalizeActiveIds(value: string | null): boolean {
+      let parsed: unknown = []
+      try {
+        parsed = value === null ? [] : JSON.parse(value)
+      } catch {
+        parsed = null
+      }
+      if (
+        !Array.isArray(parsed) ||
+        !parsed.every((id) => typeof id === 'string' && id.trim().length > 0)
+      ) {
+        console.error(
+          '[Sinapsi] Invalid active-node-ids: expected a JSON array of nonempty string IDs. Keeping previous activation.'
+        )
+        return rewrite(
+          this,
+          'active-node-ids',
+          value ?? '',
+          JSON.stringify(this.#acceptedActiveIds)
+        )
+      }
+      const valid = new Set(this.#acceptedNodes?.graph.map((node) => node.id))
+      this.#acceptedActiveIds = [...new Set(parsed as string[])].filter((id) => valid.has(id))
+      return (
+        value !== null &&
+        rewrite(this, 'active-node-ids', value, JSON.stringify(this.#acceptedActiveIds))
+      )
+    }
+
+    #pruneActivation(): void {
+      const valid = new Set(this.#acceptedNodes?.graph.map((node) => node.id))
+      const ids = this.#acceptedActiveIds.filter((id) => valid.has(id))
+      if (ids.length !== this.#acceptedActiveIds.length) this.activeNodeIds = ids
+    }
+
     #normalizeNodes(value: string | null): boolean {
       if (value === null) {
         this.#acceptedNodes = null
+        this.#pruneActivation()
         this.#presentation.close(this.#tree.presentation.contains(this.#tree.root.activeElement))
         this.#resetInteraction()
         this.#tree.syncOptions(null)
@@ -247,6 +307,7 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
 
       const focusedId = this.#acceptedNodes?.graph[this.#activeIndex]?.id
       this.#acceptedNodes = parsed.document
+      this.#pruneActivation()
       if (this.#selectedId && !this.#nodeById(this.#selectedId)) {
         this.#presentation.close(this.#tree.presentation.contains(this.#tree.root.activeElement))
         this.#selectedId = null
@@ -277,6 +338,7 @@ export function sinapsiElementClassFactory(): SinapsiElementConstructor | undefi
         move: this.move,
         speed: this.speed,
         generatedNodes: DEFAULT_SINAPSI_NODES,
+        activeNodeIds: this.#acceptedActiveIds,
         semanticNodes: this.#acceptedNodes
       }
     }

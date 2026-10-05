@@ -64,7 +64,7 @@ function frame(x = 240, y = 200): RenderFrame {
 
 afterEach(() => vi.restoreAllMocks())
 
-describe('presentation service', () => {
+describe('service/presentation', () => {
   it('renders safe text with optional fields, keeps DOM stable on frames and avoids frame layout reads', () => {
     const { tree, service, canvasRect } = setup()
     service.show(card)

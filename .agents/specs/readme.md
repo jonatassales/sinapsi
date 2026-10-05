@@ -15,3 +15,5 @@ and SPEC-021 switches that document to `{ graph }` with event-driven lighting.
 Statuses are `Proposed`, `In progress`, `Implemented`, `Superseded`, and
 `Rejected`. Use [`template.md`](./template.md), follow
 [`workflow.md`](./workflow.md), and link applicable ADRs and rules.
+
+- [022-programmatic-node-activation.spec.md](022-programmatic-node-activation.spec.md) — explicit programmatic node highlights and frozen rendering.

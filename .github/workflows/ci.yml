@@ -63,20 +63,16 @@ jobs:
           done
 
       - name: Lint
-        run: pnpm exec biome lint src sandbox test cli package.json biome.json tsconfig.json tsconfig.test.json *.config.ts commitlint.config.cjs
+        run: ./cli/graph lint
 
       - name: Typecheck
-        run: |
-          pnpm exec tsc --noEmit
-          pnpm exec tsc -p tsconfig.test.json --noEmit
+        run: ./cli/graph typecheck
 
       - name: Test
-        run: pnpm exec vitest run
+        run: ./cli/graph test
 
       - name: Build
-        run: |
-          pnpm exec tsdown
-          pnpm exec tsdown --config tsdown.standalone.config.ts
+        run: ./cli/graph build
 
       - name: Validate package version
         run: |

@@ -51,7 +51,8 @@ export class GraphAnimationService {
   private readonly renderer: CanvasRendererService
   private readonly loop: FrameLoop
   private readonly tween: Tween
-  private readonly revealTween: TweenHandle
+  private revealTween: TweenHandle | null = null
+  private scheduled = false
   private readonly tick: FrameCallback
   private properties: SinapsiProperties
   private running = false
@@ -75,6 +76,7 @@ export class GraphAnimationService {
     this.loop = dependencies.loop ?? motionLoop
     this.tween = dependencies.tween ?? motionTween
     this.tick = ({ delta }) => {
+      if (!this.running || this.frozen) return
       const move = this.effectiveMove()
       if (!this.frozen) {
         this.scene.advance(delta / MS_PER_SECOND, this.properties.move, this.properties.speed)
@@ -82,9 +84,6 @@ export class GraphAnimationService {
       this.renderFrame(move)
     }
     this.scene.reveal = 0.35
-    this.revealTween = this.tween(0.35, 1, sinapsiConfiguration.motion.revealSeconds, (value) => {
-      this.scene.reveal = value
-    })
   }
 
   start(): void {
@@ -93,8 +92,19 @@ export class GraphAnimationService {
     }
 
     this.running = true
+    if (this.frozen) this.scene.reveal = 1
+    else if (this.scene.reveal < 1) {
+      this.revealTween = this.tween(
+        this.scene.reveal,
+        1,
+        sinapsiConfiguration.motion.revealSeconds,
+        (value) => {
+          this.scene.reveal = value
+        }
+      )
+    }
     this.resize()
-    this.loop.schedule(this.tick)
+    this.syncLoop()
   }
 
   apply(properties: SinapsiProperties): void {
@@ -121,15 +131,27 @@ export class GraphAnimationService {
   }
 
   setFrozen(frozen: boolean): void {
+    if (this.frozen === frozen) return
     this.frozen = frozen
+    if (frozen) {
+      this.revealTween?.stop()
+      this.revealTween = null
+      this.scene.reveal = 1
+    }
+    this.syncLoop()
+    if (this.running) this.renderFrame()
   }
 
   setHoverId(id: string | null): void {
+    if (this.hoverId === id) return
     this.hoverId = id
+    if (this.running && this.frozen) this.renderFrame()
   }
 
   setFocusedId(id: string | null): void {
+    if (this.focusedId === id) return
     this.focusedId = id
+    if (this.running && this.frozen) this.renderFrame()
   }
 
   activateNeighborhood(id: string): void {
@@ -141,6 +163,7 @@ export class GraphAnimationService {
     const node = this.properties.semanticNodes?.graph.find((entry) => entry.id === id)
     this.selectedId = node?.id ?? null
     this.showSelectedLabels = showLabels
+    if (this.running && this.frozen) this.renderFrame()
   }
 
   /** Receives the exact frame already drawn, in CSS pixels, including frozen frames. */
@@ -160,7 +183,8 @@ export class GraphAnimationService {
 
   dispose(): void {
     this.frameListener = null
-    this.revealTween.stop()
+    this.revealTween?.stop()
+    this.revealTween = null
     // A reconnect reuses this service; do not leave the graph partially revealed.
     this.scene.reveal = 1
     if (!this.running) {
@@ -168,7 +192,15 @@ export class GraphAnimationService {
     }
 
     this.running = false
-    this.loop.cancel(this.tick)
+    this.syncLoop()
+  }
+
+  private syncLoop(): void {
+    const shouldRun = this.running && !this.frozen
+    if (shouldRun === this.scheduled) return
+    this.scheduled = shouldRun
+    if (shouldRun) this.loop.schedule(this.tick)
+    else this.loop.cancel(this.tick)
   }
 
   private effectiveMove(): SinapsiMove {
@@ -185,6 +217,7 @@ export class GraphAnimationService {
     return {
       activeId,
       activeIds,
+      programmaticIds: new Set(this.properties.activeNodeIds ?? []),
       selectedId: this.selectedId,
       labeledIds: showLabels ? activeIds : new Set(),
       focusedId: this.focusedId,
