@@ -5,7 +5,7 @@ import {
   positionPresentation
 } from './presentation-position.compute'
 
-describe('presentation position', () => {
+describe('core/presentation-position', () => {
   const bounds = { left: 8, top: 8, right: 992, bottom: 692 }
   const size = { width: 340, height: 180 }
 

@@ -126,6 +126,9 @@ describe('service/renderer', () => {
     colors.length = 0
     renderer.render({ ...frame, activeId: null }, palette)
     expect(colors).toEqual(Array(4).fill(palette.muted))
+    colors.length = 0
+    renderer.render({ ...frame, activeId: null, programmaticIds: new Set(['a', 'd']) }, palette)
+    expect(colors).toEqual([palette.primary, palette.primary, palette.muted, palette.primary])
   })
 
   it('shows keyboard focus as two outlines while presentation selection keeps resting discs', () => {

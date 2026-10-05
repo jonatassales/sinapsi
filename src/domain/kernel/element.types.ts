@@ -12,6 +12,9 @@ export interface SinapsiElement extends HTMLElement {
   set move(value: SinapsiMove | null | undefined)
   get speed(): number
   set speed(value: number | null | undefined)
+  /** Exact semantic IDs to highlight without interaction. Invalid values retain the previous set. */
+  get activeNodeIds(): readonly string[]
+  set activeNodeIds(value: readonly string[] | null | undefined)
   get nodes(): SinapsiGraphDocument | null
   set nodes(value: SinapsiGraphDocument | string | null | undefined)
 }

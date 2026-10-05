@@ -8,6 +8,8 @@ export interface SinapsiReactAttributes {
   'color-muted'?: string
   'color-primary'?: string
   'color-text'?: string
+  'active-node-ids'?: string
+  activeNodeIds?: readonly string[]
   move?: SinapsiMove
   nodes?: string | SinapsiGraphDocument
   palette?: SinapsiPaletteOverrides

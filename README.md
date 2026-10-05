@@ -268,6 +268,7 @@ With a bundler, replace the script tag with `import 'sinapsi/browser'`.
 | `move` | `idle`, `rotate`, `pulse` | `rotate` | Select the idle animation |
 | `speed` | Number in `[0.1, 10]` | `1` | Scale animation speed |
 | `nodes` | JSON `{ "graph": SinapsiNode[] }` | omitted | Semantic graph; omit for the generated decorative graph |
+| `active-node-ids` | JSON string ID array | omitted | Exact programmatic node highlights and incident edges (0.3.0) |
 | `close-label` | Text | `Close` | Accessible label for the presentation close button |
 | `aria-label` | Text | `Graph nodes` internally | Localized name for semantic keyboard navigation |
 | `color-primary` | Hex CSS color | `#F97316` | Neighborhood node fill |
@@ -301,6 +302,7 @@ The element reflects the same presentation controls. The TypeScript surface is
 | `move` | `'idle' \| 'rotate' \| 'pulse'` | Getter returns the normalized move. Setter writes the attribute; `null` / `undefined` removes it. |
 | `speed` | `number` | Unitless multiplier in `[0.1, 10]`. Setter writes the normalized number; `null` / `undefined` removes the attribute. |
 | `nodes` | `SinapsiGraphDocument \| null` | Last accepted `{ graph }` snapshot, or `null` when decorative. Setter accepts that document, its JSON string, or `null` / `undefined` to clear. |
+| `activeNodeIds` | `readonly string[]` | Reflected JSON IDs; invalid input retains previous state; null clears (0.3.0). |
 | `palette` | `{ primary, text, muted }` | Getter returns the resolved three-token object. Setter accepts a partial override; omitted tokens fall back to the package defaults. |
 
 ```ts
@@ -901,3 +903,16 @@ tree. You do not need `sinapsi/index.css` to render `<sinaps-i>`.
 ## License
 
 [MIT](./LICENSE) © Neongate AI
+
+## Programmatic highlighting (0.3.0)
+
+```js
+graph.nodes = productGraph
+graph.activeNodeIds = ['pricing', 'permissions']
+// Equivalent HTML: active-node-ids='["pricing","permissions"]'
+graph.activeNodeIds = []
+```
+
+Supply nodes before activation. IDs are deduplicated and restricted to the current semantic graph; replacement prunes removed nodes. Invalid arrays or JSON preserve the previous valid set and log a diagnostic. Null, undefined or attribute removal clears activation. The getter returns a snapshot.
+
+Only supplied nodes and their incident edges are highlighted. This does not simulate hover/click, select nodes, show labels/cards, emit interaction events, move focus or stop movement. Existing hover/focus/selection can coexist. Scheduling and limits belong to the consumer. Frozen/reduced-motion instances paint on updates without a recurring animation loop. This checkout prepares 0.3.0; publication is separate.

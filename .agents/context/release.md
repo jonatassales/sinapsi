@@ -8,8 +8,8 @@ binary and explicit npx project setup.
 
 Commit messages follow Conventional Commits. `package.json#version` must be
 canonical SemVer. A staged version change must move forward relative to `HEAD`.
-Stable 1.x releases publish from `jonatassales/sinapsi` on main; 0.x versions skip
-npm publish.
+Publication is owner-initiated through the manual Release workflow on
+`jonatassales/sinapsi` main. Canonical 0.x versions are eligible for publication.
 
 A release-oriented source change runs `graph check`; CI also lints commit history
 through the checked-in Graph entry point and runs `npm pack --dry-run`. The

@@ -49,7 +49,7 @@ export class CanvasRendererService {
   }
 
   private paintEdges(
-    { nodes, edges, reveal, activeId }: RenderFrame,
+    { nodes, edges, reveal, activeId, programmaticIds }: RenderFrame,
     palette: SinapsiPalette
   ): void {
     const visible = edges.slice(0, Math.floor(edges.length * Math.max(reveal, 0.2)))
@@ -60,7 +60,9 @@ export class CanvasRendererService {
       const from = nodes[edge.source]
       const to = nodes[edge.target]
       const near = 1 - (from.depth + to.depth) / 2
-      const neighborhood = activeId !== null && (from.id === activeId || to.id === activeId)
+      const neighborhood =
+        (activeId !== null && (from.id === activeId || to.id === activeId)) ||
+        Boolean(programmaticIds?.has(from.id) || programmaticIds?.has(to.id))
       const dim = from.dimmed && to.dimmed ? 0.28 : 1
       this.ctx.lineWidth = neighborhood ? 1.6 : 1
       this.ctx.strokeStyle = neighborhood ? palette.primary : palette.muted

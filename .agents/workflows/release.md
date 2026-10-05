@@ -18,5 +18,5 @@ Use when preparing a patch, minor, or major Sinapsi release. Publishing remains 
 
 The runtime shell guard denies autonomous package publication and asks for approval on release-boundary Git operations.
 
-`.github/workflows/release.yml` publishes only from `jonatassales/sinapsi` on main and
-skips 0.x versions.
+`.github/workflows/release.yml` is manually dispatched by the owner and publishes
+only from `jonatassales/sinapsi` on main. It accepts canonical SemVer, including 0.x.
